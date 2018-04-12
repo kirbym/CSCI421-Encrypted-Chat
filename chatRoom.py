@@ -22,6 +22,7 @@ import socket
 import random
 import math
 import string
+import monoalphabetic
 
 
 # GLOBALS
@@ -92,39 +93,6 @@ def formatNumber(number):
         temp = '0' + temp
     return temp
 
-def netThrow(conn, secret, message):
-    """Sends message through the open socket conn with the encryption key
-    secret. Sends the length of the incoming message, then sends the actual
-    message.
-
-    """
-    try:
-        conn.send(formatNumber(len(x_encode(message, secret))).encode()) #sends message length
-        conn.send(x_encode(message, secret).encode())   #sends message
-    except socket.error:
-        if len(conn_array) != 0:
-            writeToScreen(
-                "Connection issue. Sending message failed.", "System")
-            processFlag("-001")
-
-def netCatch(conn, secret):
-    """Receive and return the message through open socket conn, decrypting
-    using key secret. If the message length begins with - instead of a number,
-    process as a flag and return 1.
-
-    """
-    try:
-        data = conn.recv(4)   #receive message length
-        if data.decode()[0] == '-':
-            processFlag(data.decode(), conn)
-            return 1
-        data = conn.recv(int(data.decode()))   #receive message
-        return refract(xcrypt(data.decode(), bin(secret)[2:]))
-    except socket.error:
-        if len(conn_array) != 0:
-            writeToScreen(
-                "Connection issue. Receiving message failed.", "System")
-        processFlag("-001")
 
 def isPrime(number):
     """Checks to see if a number is prime."""
@@ -140,7 +108,6 @@ def isPrime(number):
 def processFlag(number, conn=None):
     """Process the flag corresponding to number, using open socket conn
     if necessary.
-
     """
     global statusConnect
     global conn_array
@@ -560,33 +527,7 @@ def processUserInput(text):
         params = text[text.find(" ") + 1:].split(" ")
         processUserCommands(command, params)
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-def whiteNoise(conn, secret):
-    #while loop for white noise
-    while(1):
-        message = "pzt " #the space allows filtering via .split(" ") later
-        #add random characters here? message += "sdghjks" or something
-        i = random.randint(5,10)
-        for x in range (0, i):
-            message += random.choice(string.letters)
-        time.sleep(random.random())   #consider ways to introduce randomness to when white noise packets are sent
-        try:
-            conn.send(formatNumber(len(x_encode(message, secret))).encode())
-            conn.send(x_encode(message, secret).encode())
-        except socket.error:
-            if len(conn_array) != 0:
-                writeToScreen(
-                    "Connection issue. Sending message failed.", "System")
-                #    processFlag("-001")
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-'''
-def randomString(msg):
-    n = random.randint(5, 10)
-    for i in range(n):
-        msg = msg +
-'''
 #-------------------------------------------------------------------------
 
 class Server (threading.Thread):
@@ -743,14 +684,83 @@ class Client (threading.Thread):
         # ##########################################################################THIS
         # IS GOOD, BUT I CAN'T TEST ON ONE MACHINE
 
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 def Runner(conn, secret):
     global username_array
     while 1:
         data = netCatch(conn, secret)
-        #checker =
-        data.split(" ")
-        if data != 1 and data[0] != "pzt":
+        checker = data.split(" ")
+        if data != 1 and checker[0] != "pzt":
             writeToScreen(data, username_array[conn])
+
+
+def netThrow(conn, secret, message):
+    """Sends message through the open socket conn with the encryption key
+    secret. Sends the length of the incoming message, then sends the actual
+    message.
+
+    """
+    key = "poiuytrewqlkjhgfdsamnbvcxz"
+    try:
+        #conn.send(formatNumber(len(x_encode(message, secret))).encode()) #sends message length
+        #conn.send(str(len(message)))
+        #conn.send(x_encode(message, secret).encode())   #sends message
+        conn.send(monoalphabetic.encrypt(key, message))
+    except socket.error:
+        if len(conn_array) != 0:
+            writeToScreen(
+                "Connection issue. Sending message failed.", "System")
+            processFlag("-001")
+
+def netCatch(conn, secret):
+    """Receive and return the message through open socket conn, decrypting
+    using key secret. If the message length begins with - instead of a number,
+    process as a flag and return 1.
+    """
+    #len_list = []
+    key = "poiuytrewqlkjhgfdsamnbvcxz"
+    try:
+        #msg_recv_len = conn.recv(4)   #receive message length
+        #msg_length = filter(lambda x: x.isdigit(), msg_recv_len)
+
+        #if data.decode()[0] == '-':
+        #    processFlag(data.decode(), conn)
+        #    return 1
+        #data = conn.recv(int(data.decode()))   #receive message
+        data = conn.recv(128)
+        #return refract(xcrypt(data.decode(), bin(secret)[2:]))
+        return monoalphabetic.decrypt(key, data)
+    except socket.error:
+        if len(conn_array) != 0:
+            writeToScreen(
+                "Connection issue. Receiving message failed.", "System")
+        processFlag("-001")
+
+
+def whiteNoise(conn, secret):
+    #while loop for white noise
+    key = "poiuytrewqlkjhgfdsamnbvcxz"
+    while(1):
+        message = "pzt " #the space allows filtering via .split(" ") later
+        #add random characters here? message += "sdghjks" or something
+        i = random.randint(5,10) #choose a random number of characters to add
+        for x in range (0, i):
+            message += random.choice(string.letters)  #append a random upper/lower letter
+        time.sleep(random.random())   #random() gives random float [0,1)
+        try:
+            #conn.send(formatNumber(len(x_encode(message, secret))).encode())
+            #conn.send(str(len(message)))
+            #conn.send(x_encode(message, secret).encode())
+            conn.send(monoalphabetic.encrypt(key, message))
+        except socket.error:
+            if len(conn_array) != 0:
+                writeToScreen(
+                    "Connection issue. Sending message failed.", "System")
+                #    processFlag("-001")
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #-------------------------------------------------------------------------
 # Menu helpers
