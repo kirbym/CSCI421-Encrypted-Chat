@@ -1,5 +1,4 @@
 import sys
-import time
 if not sys.hexversion > 0x03000000:
     version = 2
 else:
@@ -19,6 +18,7 @@ if version == 3:
     from tkinter.filedialog import asksaveasfilename
 import threading
 import socket
+import time
 import random
 import math
 import string
@@ -26,6 +26,8 @@ import monoalphabetic
 
 
 # GLOBALS
+key = "poiuytrewqlkjhgfdsamnbvcxz"
+
 conn_array = []  # stores open sockets
 secret_array = dict()  # key: the open sockets in conn_array,
                         # value: integers for encryption
@@ -692,7 +694,7 @@ def Runner(conn, secret):
     while 1:
         data = netCatch(conn, secret)
         checker = data.split(" ")
-        if data != 1 and checker[0] != "pzt":
+        if data != 1 and checker[0] != "pzt":    # determine if message is garbage or not via flag value
             writeToScreen(data, username_array[conn])
 
 
@@ -700,14 +702,9 @@ def netThrow(conn, secret, message):
     """Sends message through the open socket conn with the encryption key
     secret. Sends the length of the incoming message, then sends the actual
     message.
-
     """
-    key = "poiuytrewqlkjhgfdsamnbvcxz"
     try:
-        #conn.send(formatNumber(len(x_encode(message, secret))).encode()) #sends message length
-        #conn.send(str(len(message)))
-        #conn.send(x_encode(message, secret).encode())   #sends message
-        conn.send(monoalphabetic.encrypt(key, message))
+        conn.send(monoalphabetic.encrypt(key, message))   #send encrypted message
     except socket.error:
         if len(conn_array) != 0:
             writeToScreen(
@@ -719,19 +716,10 @@ def netCatch(conn, secret):
     using key secret. If the message length begins with - instead of a number,
     process as a flag and return 1.
     """
-    #len_list = []
-    key = "poiuytrewqlkjhgfdsamnbvcxz"
+    buffer_length = 128
     try:
-        #msg_recv_len = conn.recv(4)   #receive message length
-        #msg_length = filter(lambda x: x.isdigit(), msg_recv_len)
-
-        #if data.decode()[0] == '-':
-        #    processFlag(data.decode(), conn)
-        #    return 1
-        #data = conn.recv(int(data.decode()))   #receive message
-        data = conn.recv(128)
-        #return refract(xcrypt(data.decode(), bin(secret)[2:]))
-        return monoalphabetic.decrypt(key, data)
+        data = conn.recv(buffer_length)   #receive encrypted message
+        return monoalphabetic.decrypt(key, data)  #decrypt message
     except socket.error:
         if len(conn_array) != 0:
             writeToScreen(
@@ -741,19 +729,18 @@ def netCatch(conn, secret):
 
 def whiteNoise(conn, secret):
     #while loop for white noise
-    key = "poiuytrewqlkjhgfdsamnbvcxz"
+
     while(1):
         message = "pzt " #the space allows filtering via .split(" ") later
-        #add random characters here? message += "sdghjks" or something
+
         i = random.randint(5,10) #choose a random number of characters to add
         for x in range (0, i):
             message += random.choice(string.letters)  #append a random upper/lower letter
-        time.sleep(random.random())   #random() gives random float [0,1)
+
+        time.sleep(random.random())   #sleep() pauses the thread of activity a certain length of time
+                                      #random() gives random float [0,1)
         try:
-            #conn.send(formatNumber(len(x_encode(message, secret))).encode())
-            #conn.send(str(len(message)))
-            #conn.send(x_encode(message, secret).encode())
-            conn.send(monoalphabetic.encrypt(key, message))
+            conn.send(monoalphabetic.encrypt(key, message))  #send encrypted garbage message
         except socket.error:
             if len(conn_array) != 0:
                 writeToScreen(
