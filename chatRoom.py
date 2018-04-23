@@ -737,8 +737,8 @@ def whiteNoise(conn, secret):
         for x in range (0, i):
             message += random.choice(string.letters)  #append a random upper/lower letter
 
-        time.sleep(0.1)
-        #time.sleep(random.random())   #sleep() pauses the thread of activity a certain length of time
+        #time.sleep(0.1)
+        time.sleep(random.random())   #sleep() pauses the thread of activity a certain length of time
                                       #random() gives random float [0,1)
         try:
             conn.send(monoalphabetic.encrypt(key, message))  #send encrypted garbage message
