@@ -15,4 +15,11 @@ an eavesdropper from pinpointing when a user sends a legitimate message. Even by
 should have a difficult time distinguishing which messages are fake and which are not since all the messages are encrypted. 
 
 
-Usage:
+Usage: python chatRoom.py
+
+One instance of the program acts as a Server and hosts the chat room. Select 'Server' radio button and click 'Connect.' Choose a port
+to open for the chat room and send messages through. Click 'Launch.' Now the host should be ready for a client to connect. With
+another instance, the program acts as the Client and connects to the Server instance. Choose the 'Client' radio button anc click
+'Connect.' Enter the IP address and port number of the instance it is attempting to connect with. Click 'Connect.' Now, the Client 
+should be connected to the Server and both instances should be able to send messages between each other. In the background, fake
+messages are being sent over the network creating random spikes of packets. The messages are encrypted with the monoalphabetic cipher.
