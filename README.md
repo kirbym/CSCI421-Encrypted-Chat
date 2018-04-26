@@ -15,7 +15,7 @@ an eavesdropper from pinpointing when a user sends a legitimate message. Even by
 should have a difficult time distinguishing which messages are fake and which are not since all the messages are encrypted. 
 
 
-Usage: python chatRoom.py
+/b Usage: python chatRoom.py /b
 
 One instance of the program acts as a Server and hosts the chat room. Select 'Server' radio button and click 'Connect.' Choose a port
 to open for the chat room and send messages through. Click 'Launch.' Now the host should be ready for a client to connect. With
